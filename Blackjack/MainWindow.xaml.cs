@@ -1,4 +1,5 @@
 ﻿using Blackjack.Models;
+using System.Numerics;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -32,9 +33,7 @@ namespace Blackjack
 
         private void StartNewGame()
         {
-            playerStack.Children.Clear();
-            bankStack.Children.Clear();
-            creditsTextBlock.Text = _player.Credits.ToString();
+            RefreshUI();
             StartNextRound();
         }
 
@@ -49,19 +48,28 @@ namespace Blackjack
 
         private void RefreshUI()
         {
-
+            playerStack.Children.Clear();
+            bankStack.Children.Clear();
+            creditsTextBlock.Text = _player.Credits.ToString();
         }
 
         private void DealCardTo(Player player, bool show)
         {
             int rand = _random.Next(0, _cards.Count);
+            player.Cards.Add(_cards[rand]);
             AddImageToStackPanel(player.CardStack, _cards[rand], show);
             _cards.RemoveAt(rand);
+            remainingCardsTextBlock.Text = _cards.Count.ToString();
         }
 
-        private void CountValueFromStack()
+        private void CountValueFromStack(Player player)
         {
-
+            int points = 0;
+            foreach (Card card in player.Cards)
+            {
+                points += card.Value[0];
+            }
+            player.Points = points;
         }
 
         /// <summary>
@@ -165,6 +173,23 @@ namespace Blackjack
         private void newGameButton_Click(object sender, RoutedEventArgs e)
         {
             StartNewGame();
+        }
+
+        private void betPlacedButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Number moet bijgehouden worden voor het einde van het spel
+            if (int.TryParse(ceditsInputTextBox.Text, out int number) 
+                && number < _player.Credits)
+            {
+                _player.Credits -= number;
+                // Zorg dat de kaart getoont wordt
+                _player.Cards[1].IsVisible = true;
+
+                creditsTextBlock.Text = _player.Credits.ToString();
+                playerBetPanel.Visibility = Visibility.Hidden;
+                cardButton.Visibility = Visibility.Visible;
+                stopButton.Visibility = Visibility.Visible;
+            }
         }
     }
 }
