@@ -42,7 +42,17 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <Grid x:Name="resultGrid" Grid.ColumnSpan="3"></Grid>
+            <Grid x:Name="resultGrid" Grid.ColumnSpan="3" Panel.ZIndex="1" Visibility="Hidden">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Name="stopGameButton" Content="Stop" Grid.Column="0" VerticalAlignment="Bottom" Height="50" Width="100" Foreground="White" Background="DarkRed" BorderBrush="Red" BorderThickness="4" Padding="5" Margin="5" Click="stopGameButton_Click"/>
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Name="resultTextBlock" Grid.Column="1" Foreground="White"/>
+                <Button Name="newRoundButton" Content="Next" Grid.Column="2" VerticalAlignment="Bottom" Height="50" Width="100" Foreground="White" Background="DarkGreen" BorderBrush="Green" BorderThickness="4" Padding="5" Margin="5" Click="newRoundButton_Click"/>
+            </Grid>
             <StackPanel Visibility="Hidden" x:Name="playerBetPanel" Grid.Column="0" Width="200" VerticalAlignment="Center">
                 <Label Content="Place your bet:" Foreground="White"/>
                 <TextBox Name="ceditsInputTextBox" Margin="5"/>

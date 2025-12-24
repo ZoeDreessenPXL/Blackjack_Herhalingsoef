@@ -22,6 +22,7 @@ namespace Blackjack
         Player _bank;
         Random _random = new Random();
         List<Card> _cards;
+        int _stake;
 
         public MainWindow()
         {
@@ -36,7 +37,6 @@ namespace Blackjack
         /// </summary>
         private void StartNewGame()
         {
-            RefreshUI();
             StartNextRound();
         }
 
@@ -45,6 +45,7 @@ namespace Blackjack
         /// </summary>
         private void StartNextRound()
         {
+            RefreshUI();
             _cards = _deck.ToList<Card>();
             DealCardTo(_player, true);
             DealCardTo(_player, false);
@@ -74,14 +75,14 @@ namespace Blackjack
             AddImageToStackPanel(player.CardStack, _cards[rand], show);
             _cards.RemoveAt(rand);
             remainingCardsTextBlock.Text = _cards.Count.ToString();
+            CountValueFromStack(player);
         }
 
         /// <summary>
         /// Counts the amount of points a player has
         /// </summary>
         /// <param name="player">The player for which the points need to be counted</param>
-        /// <returns>The point amount</returns>
-        private int CountValueFromStack(Player player)
+        private void CountValueFromStack(Player player)
         {
             int points = 0;
             foreach (Image image in player.CardStack.Children)
@@ -90,7 +91,6 @@ namespace Blackjack
                 points += card.Value[0];
             }
             player.Points = points;
-            return points;
         }
 
         /// <summary>
@@ -191,10 +191,10 @@ namespace Blackjack
         private void betPlacedButton_Click(object sender, RoutedEventArgs e)
         {
             // Number moet bijgehouden worden voor het einde van het spel
-            if (int.TryParse(ceditsInputTextBox.Text, out int number) 
-                && number < _player.Credits)
+            if (int.TryParse(ceditsInputTextBox.Text, out _stake) 
+                && _stake < _player.Credits)
             {
-                _player.Credits -= number;
+                _player.Credits = _player.Credits - _stake;
 
                 TurnCardOver(_player);
 
@@ -222,22 +222,22 @@ namespace Blackjack
         /// </summary>
         private void cardButton_Click(object sender, RoutedEventArgs e)
         {
-            int points = CountValueFromStack(_player);
             int cardAmount = _player.CardStack.Children.Count;
-            if (points < 21 && cardAmount < 7)
+            if (_player.Points < 21 && cardAmount < 7)
             {
                 DealCardTo(_player, true);
             }
         }
 
         /// <summary>
-        /// Gives turn to the bank
+        /// Gives turn to the bank, then shows the results
         /// </summary>
         private void stopButton_Click(object sender, RoutedEventArgs e)
         {
             BankPlay();
             cardButton.Visibility = Visibility.Hidden;
             stopButton.Visibility = Visibility.Hidden;
+            ShowResult();
         }
 
         /// <summary>
@@ -246,12 +246,49 @@ namespace Blackjack
         private void BankPlay()
         {
             TurnCardOver(_bank);
-            int points = CountValueFromStack(_bank);
-            while (points <= 16)
+            while (_bank.Points <= 16)
             {
                 DealCardTo(_bank, true);
-                points = CountValueFromStack(_bank);
             }
+        }
+
+        /// <summary>
+        /// Determines the result
+        /// </summary>
+        private void ShowResult()
+        {
+            int cardAmount = _player.CardStack.Children.Count;
+            resultGrid.Visibility = Visibility.Visible;
+
+            if ((_bank.Points > 21 && _player.Points > 21) || _bank.Points == _player.Points)
+            {
+                resultGrid.Background = new SolidColorBrush(Colors.Gray) { Opacity = 0.5 };
+                resultTextBlock.Text = "It's a draw...";
+                _player.Credits += _stake;
+            }
+            else if ((cardAmount == 7 && _player.Points <= 21) || _bank.Points > 21 
+                || (_bank.Points < _player.Points && _player.Points <= 21))
+            {
+                resultGrid.Background = new SolidColorBrush(Colors.Green) { Opacity = 0.5 };
+                resultTextBlock.Text = "You won!";
+                _player.Credits += (_stake * 2);
+            }
+            else
+            {
+                resultGrid.Background = new SolidColorBrush(Colors.Red) { Opacity = 0.5 };
+                resultTextBlock.Text = "You lost!";
+            }
+        }
+
+        private void stopGameButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void newRoundButton_Click(object sender, RoutedEventArgs e)
+        {
+            StartNextRound();
+            resultGrid.Visibility = Visibility.Hidden;
         }
     }
 }
