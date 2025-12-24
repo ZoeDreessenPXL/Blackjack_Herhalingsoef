@@ -31,12 +31,18 @@ namespace Blackjack
             _bank = new Player("Bank", bankStack);
         }
 
+        /// <summary>
+        /// Starts a new game
+        /// </summary>
         private void StartNewGame()
         {
             RefreshUI();
             StartNextRound();
         }
 
+        /// <summary>
+        /// Set up a new round
+        /// </summary>
         private void StartNextRound()
         {
             _cards = _deck.ToList<Card>();
@@ -47,6 +53,9 @@ namespace Blackjack
             playerBetPanel.Visibility = Visibility.Visible;
         }
 
+        /// <summary>
+        /// Resets the UI of the game
+        /// </summary>
         private void RefreshUI()
         {
             playerStack.Children.Clear();
@@ -54,6 +63,11 @@ namespace Blackjack
             creditsTextBlock.Text = _player.Credits.ToString();
         }
 
+        /// <summary>
+        /// Deals a card to a player
+        /// </summary>
+        /// <param name="player">The player to which the card should be dealt</param>
+        /// <param name="show">A boolean that's passed through</param>
         private void DealCardTo(Player player, bool show)
         {
             int rand = _random.Next(0, _cards.Count);
@@ -62,7 +76,12 @@ namespace Blackjack
             remainingCardsTextBlock.Text = _cards.Count.ToString();
         }
 
-        private void CountValueFromStack(Player player)
+        /// <summary>
+        /// Counts the amount of points a player has
+        /// </summary>
+        /// <param name="player">The player for which the points need to be counted</param>
+        /// <returns>The point amount</returns>
+        private int CountValueFromStack(Player player)
         {
             int points = 0;
             foreach (Image image in player.CardStack.Children)
@@ -71,6 +90,7 @@ namespace Blackjack
                 points += card.Value[0];
             }
             player.Points = points;
+            return points;
         }
 
         /// <summary>
@@ -92,7 +112,6 @@ namespace Blackjack
             //Bewaar het volledige Card-object in de Tag-property van de Image control
             image.Tag = card;
             image.Source = card.ImageSource;
-
 
             //Voeg de Image control toe aan het StackPanel
             panel.Children.Add(image);
@@ -161,13 +180,14 @@ namespace Blackjack
             new Card { ImageUrl="/images/cards/spades_K.png", Value=new[] {10}},
         };
 
-        public static object Mainwindow { get; private set; }
-
         private void newGameButton_Click(object sender, RoutedEventArgs e)
         {
             StartNewGame();
         }
 
+        /// <summary>
+        /// Starts the play when the bet is placed correctly
+        /// </summary>
         private void betPlacedButton_Click(object sender, RoutedEventArgs e)
         {
             // Number moet bijgehouden worden voor het einde van het spel
@@ -176,15 +196,61 @@ namespace Blackjack
             {
                 _player.Credits -= number;
 
-                Image image = (Image)_player.CardStack.Children[1];
-                Card card = (Card)image.Tag;
-                card.IsVisible = true;
-                image.Source = card.ImageSource;
+                TurnCardOver(_player);
 
                 creditsTextBlock.Text = _player.Credits.ToString();
                 playerBetPanel.Visibility = Visibility.Hidden;
                 cardButton.Visibility = Visibility.Visible;
                 stopButton.Visibility = Visibility.Visible;
+            }
+        }
+
+        /// <summary>
+        /// Show the card initianally turned over for the player
+        /// </summary>
+        /// <param name="player">The player it that it needs to be turned over for</param>
+        private void TurnCardOver (Player player)
+        {
+            Image image = (Image)player.CardStack.Children[1];
+            Card card = (Card)image.Tag;
+            card.IsVisible = true;
+            image.Source = card.ImageSource;
+        }
+
+        /// <summary>
+        /// Deals new card to the player if total is less than 21 points
+        /// </summary>
+        private void cardButton_Click(object sender, RoutedEventArgs e)
+        {
+            int points = CountValueFromStack(_player);
+            int cardAmount = _player.CardStack.Children.Count;
+            if (points < 21 && cardAmount < 7)
+            {
+                DealCardTo(_player, true);
+            }
+        }
+
+        /// <summary>
+        /// Gives turn to the bank
+        /// </summary>
+        private void stopButton_Click(object sender, RoutedEventArgs e)
+        {
+            BankPlay();
+            cardButton.Visibility = Visibility.Hidden;
+            stopButton.Visibility = Visibility.Hidden;
+        }
+
+        /// <summary>
+        /// Executes the bank's play
+        /// </summary>
+        private void BankPlay()
+        {
+            TurnCardOver(_bank);
+            int points = CountValueFromStack(_bank);
+            while (points <= 16)
+            {
+                DealCardTo(_bank, true);
+                points = CountValueFromStack(_bank);
             }
         }
     }
