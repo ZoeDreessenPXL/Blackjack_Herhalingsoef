@@ -10,7 +10,6 @@ namespace Blackjack.Models
     internal class Player
     {
         public string Name { get; }
-        public List<Card> Cards { get; set; }
         public int Credits { get; set; }
         public StackPanel CardStack { get; }
         public int Points { get; set; }
@@ -21,7 +20,6 @@ namespace Blackjack.Models
             Credits = 500;
             Points = 0;
             CardStack = cardStack;
-            Cards = new List<Card>();
         }
     }
 }

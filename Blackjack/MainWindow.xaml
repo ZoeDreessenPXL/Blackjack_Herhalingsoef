@@ -43,7 +43,7 @@
             </Grid.ColumnDefinitions>
 
             <Grid x:Name="resultGrid" Grid.ColumnSpan="3"></Grid>
-            <StackPanel x:Name="playerBetPanel" Grid.Column="0" Width="200" VerticalAlignment="Center">
+            <StackPanel Visibility="Hidden" x:Name="playerBetPanel" Grid.Column="0" Width="200" VerticalAlignment="Center">
                 <Label Content="Place your bet:" Foreground="White"/>
                 <TextBox Name="ceditsInputTextBox" Margin="5"/>
                 <Button Name="betPlacedButton" Content="Play" Foreground="White" Background="DarkGreen" BorderBrush="Green" BorderThickness="4" Padding="5" Margin="5" Click="betPlacedButton_Click"/>

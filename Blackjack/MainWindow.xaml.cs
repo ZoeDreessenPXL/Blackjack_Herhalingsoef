@@ -44,6 +44,7 @@ namespace Blackjack
             DealCardTo(_player, false);
             DealCardTo(_bank, true);
             DealCardTo(_bank, false);
+            playerBetPanel.Visibility = Visibility.Visible;
         }
 
         private void RefreshUI()
@@ -56,7 +57,6 @@ namespace Blackjack
         private void DealCardTo(Player player, bool show)
         {
             int rand = _random.Next(0, _cards.Count);
-            player.Cards.Add(_cards[rand]);
             AddImageToStackPanel(player.CardStack, _cards[rand], show);
             _cards.RemoveAt(rand);
             remainingCardsTextBlock.Text = _cards.Count.ToString();
@@ -65,8 +65,9 @@ namespace Blackjack
         private void CountValueFromStack(Player player)
         {
             int points = 0;
-            foreach (Card card in player.Cards)
+            foreach (Image image in player.CardStack.Children)
             {
+                Card card = (Card)image.Tag;
                 points += card.Value[0];
             }
             player.Points = points;
@@ -90,16 +91,8 @@ namespace Blackjack
             image.Margin = new Thickness(5, 0, 5, 0);
             //Bewaar het volledige Card-object in de Tag-property van de Image control
             image.Tag = card;
-            // Zou dit liever in Card doen maar dan overschrijf je de originele en je weet niet
-            // welke je moet terugzetten
-            if (isVisible)
-            {
-                image.Source = new BitmapImage(new Uri(card.ImageUrl, UriKind.Relative));
-            }
-            else
-            {
-                image.Source = new BitmapImage(new Uri("images/cards/back.png", UriKind.Relative));
-            }
+            image.Source = card.ImageSource;
+
 
             //Voeg de Image control toe aan het StackPanel
             panel.Children.Add(image);
@@ -182,8 +175,11 @@ namespace Blackjack
                 && number < _player.Credits)
             {
                 _player.Credits -= number;
-                // Zorg dat de kaart getoont wordt
-                _player.Cards[1].IsVisible = true;
+
+                Image image = (Image)_player.CardStack.Children[1];
+                Card card = (Card)image.Tag;
+                card.IsVisible = true;
+                image.Source = card.ImageSource;
 
                 creditsTextBlock.Text = _player.Credits.ToString();
                 playerBetPanel.Visibility = Visibility.Hidden;
