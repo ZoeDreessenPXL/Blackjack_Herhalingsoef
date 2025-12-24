@@ -12,14 +12,16 @@ namespace Blackjack.Models
         public string Name { get; }
         public int Credits { get; set; }
         public StackPanel CardStack { get; }
+        public TextBlock PointTextBlock { get; set; }
         public int Points { get; set; }
 
-        public Player(string name, StackPanel cardStack)
+        public Player(string name, StackPanel cardStack, TextBlock pointTextBlock)
         {
             Name = name;
             Credits = 500;
             Points = 0;
             CardStack = cardStack;
+            PointTextBlock = pointTextBlock;
         }
     }
 }

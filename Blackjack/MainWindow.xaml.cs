@@ -28,8 +28,8 @@ namespace Blackjack
         {
             InitializeComponent();
 
-            _player = new Player("Player", playerStack);
-            _bank = new Player("Bank", bankStack);
+            _player = new Player("Player", playerStack, playerPointsTextBlock);
+            _bank = new Player("Bank", bankStack, bankPointsTextBlock);
         }
 
         /// <summary>
@@ -76,6 +76,7 @@ namespace Blackjack
             _cards.RemoveAt(rand);
             remainingCardsTextBlock.Text = _cards.Count.ToString();
             CountValueFromStack(player);
+            CountVisiblePoints(player);
         }
 
         /// <summary>
@@ -91,6 +92,24 @@ namespace Blackjack
                 points += card.Value[0];
             }
             player.Points = points;
+        }
+
+        /// <summary>
+        /// Count the value of the open cards
+        /// </summary>
+        /// <param name="player">The player you need to count it for</param>
+        private void CountVisiblePoints(Player player)
+        {
+            int points = 0;
+            foreach (Image image in  player.CardStack.Children)
+            {
+                Card card = (Card)image.Tag;
+                if (card.IsVisible)
+                {
+                    points += card.Value[0];
+                }
+                player.PointTextBlock.Text = points.ToString();
+            }
         }
 
         /// <summary>
@@ -215,6 +234,7 @@ namespace Blackjack
             Card card = (Card)image.Tag;
             card.IsVisible = true;
             image.Source = card.ImageSource;
+            CountVisiblePoints(_player);
         }
 
         /// <summary>
