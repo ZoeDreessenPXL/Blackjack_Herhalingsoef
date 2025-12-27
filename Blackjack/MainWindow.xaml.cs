@@ -27,16 +27,15 @@ namespace Blackjack
         public MainWindow()
         {
             InitializeComponent();
-
-            _player = new Player("Player", playerStack, playerPointsTextBlock);
-            _bank = new Player("Bank", bankStack, bankPointsTextBlock);
         }
 
-        /// <summary>
-        /// Starts a new game
-        /// </summary>
+        // TODO
+        // Stop button van results paneel wat moet die doen?
+        // Kan mijn code schoner?
         private void StartNewGame()
         {
+            _player = new Player("Player", playerStack, playerPointsTextBlock);
+            _bank = new Player("Bank", bankStack, bankPointsTextBlock);
             StartNextRound();
         }
 
@@ -86,12 +85,29 @@ namespace Blackjack
         private void CountValueFromStack(Player player)
         {
             int points = 0;
+            int aceAmount = 0;
             foreach (Image image in player.CardStack.Children)
             {
                 Card card = (Card)image.Tag;
                 points += card.Value[0];
+                if (card.Value.Length == 2)
+                {
+                    aceAmount++;
+                }
             }
-            player.Points = points;
+            player.Points = CountAce(points, aceAmount);
+        }
+
+        private int CountAce (int points, int aceAmount)
+        {
+            for (int i = 0; i < aceAmount; i++)
+            {
+                if (points + 10 <= 21)
+                {
+                    points += 10;
+                }
+            }
+            return points;
         }
 
         /// <summary>
@@ -101,15 +117,20 @@ namespace Blackjack
         private void CountVisiblePoints(Player player)
         {
             int points = 0;
+            int aceAmount = 0;
             foreach (Image image in  player.CardStack.Children)
             {
                 Card card = (Card)image.Tag;
                 if (card.IsVisible)
                 {
                     points += card.Value[0];
+                    if (card.Value.Length == 2)
+                    {
+                        aceAmount++;
+                    }
                 }
-                player.PointTextBlock.Text = points.ToString();
             }
+            player.PointTextBlock.Text = CountAce(points, aceAmount).ToString();
         }
 
         /// <summary>
@@ -234,7 +255,7 @@ namespace Blackjack
             Card card = (Card)image.Tag;
             card.IsVisible = true;
             image.Source = card.ImageSource;
-            CountVisiblePoints(_player);
+            CountVisiblePoints(player);
         }
 
         /// <summary>
